@@ -1,0 +1,25 @@
+# Kubernetes / Kustomize — never commit real credentials or kubeconfigs.
+# Secret manifests in this repo exist only as secret.example.yaml templates
+# (Principle V) — this rule guards against ever committing a real one
+# alongside them.
+*.secret.yaml
+!secret.example.yaml
+secrets/
+.kube/
+kubeconfig*
+*.key
+*.crt
+*.pem
+
+# Local tooling
+.venv/
+venv/
+
+# Editors / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp

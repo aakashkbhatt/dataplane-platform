@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Carried over as a starting point per FR-007 / spec Assumption A3 — not
+# validated against a real EKS cluster as part of this feature. Postgres
+# here is net-new (spec Assumption A2) — dataplane-api's cutover from its
+# existing external Postgres is a separate, later feature.
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: add
+        path: /spec/volumeClaimTemplates/0/spec/storageClassName
+        value: gp3
+  - target:
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: "2"
+            memory: 2Gi

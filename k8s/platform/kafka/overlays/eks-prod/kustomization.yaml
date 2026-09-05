@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Carried over as a starting point per FR-007 / spec Assumption A3 — not
+# validated against a real EKS cluster as part of this feature. A real
+# production Kafka deployment should grow this into a multi-broker KRaft
+# quorum (raise replicas, expand KAFKA_CONTROLLER_QUORUM_VOTERS in a
+# ConfigMap patch) before being trusted with production traffic.
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: StatefulSet
+      name: kafka
+    patch: |-
+      - op: add
+        path: /spec/volumeClaimTemplates/0/spec/storageClassName
+        value: gp3
+  - target:
+      kind: StatefulSet
+      name: kafka
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: "1"
+            memory: 2Gi
+          limits:
+            cpu: "2"
+            memory: 4Gi

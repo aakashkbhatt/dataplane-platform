@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: platform
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/part-of: platform-infra
+spec:
+  serviceName: kafka
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka
+    spec:
+      containers:
+        - name: kafka
+          # Pinned per constitution Principle III / research.md §1 — no
+          # floating tag.
+          image: apache/kafka:4.1.2
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+          ports:
+            - name: broker
+              containerPort: 9092
+            - name: controller
+              containerPort: 9093
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            tcpSocket:
+              port: broker
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: broker
+            initialDelaySeconds: 40
+            periodSeconds: 15
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
+  # storageClassName is intentionally omitted here — each overlay patches
+  # it in for its environment (research.md §2's StorageClass-reference
+  # pattern, reused for Kafka's log dir).
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+        labels:
+          app.kubernetes.io/name: kafka
+          app.kubernetes.io/part-of: platform-infra
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: platform
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/part-of: platform-infra
+spec:
+  selector:
+    app.kubernetes.io/name: minio
+  ports:
+    # contracts/minio.md: minio.platform.svc.cluster.local:9000 (S3 API)
+    - name: api
+      port: 9000
+      targetPort: 9000
+    # console is cluster-internal only for this feature (not exposed)
+    - name: console
+      port: 9090
+      targetPort: 9090

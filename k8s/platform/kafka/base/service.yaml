@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: platform
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/part-of: platform-infra
+spec:
+  # Headless — gives kafka-0 (and future broker pods) stable per-pod DNS
+  # for the controller quorum, per contracts/kafka.md's stable endpoint:
+  # kafka.platform.svc.cluster.local:9092
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: kafka
+  ports:
+    - name: broker
+      port: 9092
+      targetPort: 9092
+    - name: controller
+      port: 9093
+      targetPort: 9093
