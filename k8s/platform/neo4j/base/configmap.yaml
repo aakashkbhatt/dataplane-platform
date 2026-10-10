@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neo4j-config
+  namespace: platform
+  labels:
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/part-of: platform-infra
+data:
+  # The image maps NEO4J_<setting> to neo4j.conf (`.` → `_`, `_` → `__`).
+  # Explicit sizes keep Neo4j inside the container's memory limit instead of
+  # sizing itself from the node's total RAM. Overlays raise these alongside
+  # their resource limits.
+  NEO4J_server_memory_heap_initial__size: 512m
+  NEO4J_server_memory_heap_max__size: 512m
+  NEO4J_server_memory_pagecache_size: 256m
